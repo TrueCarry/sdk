@@ -90,7 +90,7 @@ export class BridgeProvider implements HTTPProvider {
 
         const universalLink =
             'universalLink' in this.walletConnectionSource &&
-            this.walletConnectionSource.universalLink
+                this.walletConnectionSource.universalLink
                 ? this.walletConnectionSource.universalLink
                 : this.standardUniversalLink;
 
@@ -133,7 +133,21 @@ export class BridgeProvider implements HTTPProvider {
         );
 
         try {
-            await this.gateway.registerSession({ openingDeadlineMS: 5000 });
+            let i = 0;
+            let attempts = 10;
+            let error = null;
+            for (; i < attempts; i++) {
+                try {
+                    await this.gateway.registerSession({ openingDeadlineMS: 5000 });
+                    break;
+                } catch (e) {
+                    //
+                    error = e;
+                }
+            }
+            if (i === attempts && error) {
+                throw error;
+            }
         } catch (e) {
             await this.disconnect();
             return;

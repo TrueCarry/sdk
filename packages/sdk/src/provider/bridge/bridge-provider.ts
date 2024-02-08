@@ -113,7 +113,30 @@ export class BridgeProvider implements HTTPProvider {
                         : ''
             };
 
-            return this.openGateways(storedConnection.sessionCrypto, { openingDeadlineMS: 5000 });
+            try {
+                let i = 0;
+                let attempts = 10;
+                let error = null;
+                for (; i < attempts; i++) {
+                    try {
+                        await this.openGateways(storedConnection.sessionCrypto, {
+                            openingDeadlineMS: 5000
+                        });
+                        break;
+                    } catch (e) {
+                        //
+                        error = e;
+                    }
+                }
+                if (i === attempts && error) {
+                    throw error;
+                }
+            } catch (e) {
+                await this.disconnect();
+                return;
+            }
+
+            return;
         }
 
         if (Array.isArray(this.walletConnectionSource)) {
@@ -393,7 +416,7 @@ export class BridgeProvider implements HTTPProvider {
                     this.storage,
                     source.bridgeUrl,
                     sessionCrypto.sessionId,
-                    () => {},
+                    () => { },
                     e => {
                         console.error(e);
                     }

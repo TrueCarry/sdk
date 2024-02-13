@@ -130,6 +130,8 @@ export class BridgeProvider implements HTTPProvider {
                 }
                 if (i === attempts && error) {
                     throw error;
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, 200));
                 }
             } catch (e) {
                 await this.disconnect();
@@ -170,6 +172,8 @@ export class BridgeProvider implements HTTPProvider {
             }
             if (i === attempts && error) {
                 throw error;
+            } else {
+                await new Promise(resolve => setTimeout(resolve, 200));
             }
         } catch (e) {
             await this.disconnect();

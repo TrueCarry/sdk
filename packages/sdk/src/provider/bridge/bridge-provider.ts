@@ -149,20 +149,19 @@ export class BridgeProvider implements HTTPProvider {
 
         this.session = storedConnection.session;
 
-        this.gateway = new BridgeGateway(
-            this.storage,
-            this.walletConnectionSource.bridgeUrl,
-            storedConnection.session.sessionCrypto.sessionId,
-            this.gatewayListener.bind(this),
-            this.gatewayErrorsListener.bind(this)
-        );
-
         try {
             let i = 0;
             let attempts = 10;
             let error = null;
             for (; i < attempts; i++) {
                 try {
+                    this.gateway = new BridgeGateway(
+                        this.storage,
+                        this.walletConnectionSource.bridgeUrl,
+                        storedConnection.session.sessionCrypto.sessionId,
+                        this.gatewayListener.bind(this),
+                        this.gatewayErrorsListener.bind(this)
+                    );
                     await this.gateway.registerSession({ openingDeadlineMS: 5000 });
                     break;
                 } catch (e) {

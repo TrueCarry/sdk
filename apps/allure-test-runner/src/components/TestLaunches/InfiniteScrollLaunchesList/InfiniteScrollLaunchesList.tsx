@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { LaunchesList } from '../LaunchesList/LaunchesList';
+import { LaunchCard } from '../../LaunchCard/LaunchCard';
+import { Loader2 } from 'lucide-react';
 import type { Launch } from '../../../models';
 
 type Props = {
@@ -25,6 +26,7 @@ export function InfiniteScrollLaunchesList({
 }: Props) {
     const observerRef = useRef<IntersectionObserver | null>(null);
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
+    const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
     // Intersection Observer callback
     const handleObserver = useCallback(
@@ -37,7 +39,7 @@ export function InfiniteScrollLaunchesList({
         [hasMore, loadingMore, loading, onLoadMore]
     );
 
-    // Set up intersection observer with document as root (page scroll)
+    // Set up intersection observer with scroll container as root
     useEffect(() => {
         if (observerRef.current) {
             observerRef.current.disconnect();
@@ -46,7 +48,7 @@ export function InfiniteScrollLaunchesList({
         observerRef.current = new IntersectionObserver(handleObserver, {
             threshold: 0.1,
             rootMargin: '200px', // Load more when trigger is 200px away from viewport
-            root: null // Use document as root for page scroll
+            root: scrollContainerRef.current // Use scroll container as root
         });
 
         if (loadMoreRef.current) {
@@ -73,16 +75,34 @@ export function InfiniteScrollLaunchesList({
                 onComplete={onComplete}
             />
 
-            {/* Load more trigger element */}
-            {hasMore && (
-                <div ref={loadMoreRef} className="infinite-scroll-trigger">
-                    {loadingMore && (
-                        <div className="infinite-scroll-loading">
-                            <div className="infinite-scroll-spinner"></div>
+            {/* Scrollable Content */}
+            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
+                <div className="space-y-4 lg:space-y-0">
+                    {launches.map(launch => (
+                        <LaunchCard
+                            key={launch.id}
+                            launch={launch}
+                            onOpen={onOpen}
+                            onComplete={onComplete}
+                            isSelected={selectedLaunchId === launch.id}
+                        />
+                    ))}
+
+                    {/* Load more trigger element */}
+                    {hasMore && (
+                        <div ref={loadMoreRef} className="flex justify-center py-4 lg:py-6">
+                            {loadingMore && (
+                                <div className="flex items-center space-x-2">
+                                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                    <span className="text-sm lg:text-base text-muted-foreground">
+                                        Loading more...
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
-            )}
+            </div>
         </div>
     );
 }
